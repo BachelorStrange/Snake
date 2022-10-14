@@ -1,51 +1,19 @@
+from event_handling import EventHandler
 import pygame
 from pygame.locals import *
 from sys import exit
 import time
 import random
-
-
-class Playground:
-
-    def __init__(self, playground_width=500):
-        self.screen = pygame.display.set_mode((playground_width, playground_width), 0, 32)
-        self.field_width = 10
-        self.nr_fields = int(playground_width/self.field_width)
-        self.coords = self.valid_centers()
-        self.playground_width = playground_width
-
-
-
-
-    def valid_centers(self):
-        coords = list()
-        start = int(self.field_width/2)
-        for i in range(self.nr_fields):
-            start = start+self.field_width
-            coords.append(start)
-
-        return coords
-
-
-    def border_collision_detection(self, tail_coords):
-        x = tail_coords[0][0]
-        y = tail_coords[0][1]
-        if x >= self.screen.get_width():
-            return True
-        elif x <= 0:
-            return True
-        elif y >= self.screen.get_height():
-            return True
-        elif y <= 0:
-            return True
-
+from playground import Playground
+from user_interface import UserInterface
 
 
 class SnakeGame:
 
-    def __init__(self, playground):
+    def __init__(self, playground, ui):
         self.tail_coords = list()
         self.playground = playground
+        self.ui = ui
 
         x = 100
         y = 100
@@ -64,13 +32,6 @@ class SnakeGame:
         self.stepsx.append(self.stepx)
         self.stepsy.append(self.stepy)
         self.tail_coords.append((x, y))
-        self.my_font = pygame.font.SysFont("arial", 36)
-        self.score_font = pygame.font.SysFont("arial", 16)
-
-    def show_score(self):
-        score_display = self.score_font.render("Score: "+str(self.score), False, (255,255,255), (0,0,0))
-        self.playground.screen.blit(score_display, (5, self.playground.playground_width-20))
-
 
 
     def create_apple(self):
@@ -129,66 +90,29 @@ class SnakeGame:
                                   (self.snake_part_width, self.snake_part_width)))
 
 
-    def event_handling(self):
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                exit()
-
-            if event.type == KEYDOWN:
-                if event.key == K_DOWN:
-                    self.stepy = +self.step
-                    self.stepx = 0
-
-                elif event.key == K_UP:
-                    self.stepy = -self.step
-                    self.stepx = 0
-
-                elif event.key == K_LEFT:
-                    self.stepx = -self.step
-                    self.stepy = 0
-
-                elif event.key == K_RIGHT:
-                    self.stepx = self.step
-                    self.stepy = 0
-
-            if event.type == KEYUP:
-                if event.key == K_DOWN:
-                    # y += step
-                    self.stepy = self.step
-                    self.stepx = 0
-
-                elif event.key == K_UP:
-                    self.stepy = -self.step
-                    self.stepx = 0
-
-                elif event.key == K_LEFT:
-                    self.stepx = -self.step
-                    self.stepy = 0
-
-                elif event.key == K_RIGHT:
-                    self.stepx = self.step
-                    self.stepy = 0
-
-if __name__ == "__main__":
+def main():
 
     pygame.init()
     playground = Playground()
-    g = SnakeGame(playground)
+    ui = UserInterface()
+    g = SnakeGame(playground, ui)
+    event_handler = EventHandler()
 
     while True:
         time.sleep(0.1)
 
         if playground.border_collision_detection(g.tail_coords):
-            playground.screen.fill((0, 0, 0))
-            surface = g.my_font.render("Game Over", False, (255,255,255), (0,0,0))
-            final_score = g.my_font.render("Your Final Score: "+str(g.score), False, (255, 255, 255), (0, 0, 0))
-            playground.screen.blit(surface, (175,200))
-            playground.screen.blit(final_score, (130,250))
+            retry = ui.game_over_screen(g.score, playground, event_handler)
+            if retry:
+                main()
+        elif playground.snake_collision_detection(g.tail_coords):
+            retry = ui.game_over_screen(g.score, playground, event_handler)
+            if retry:
+                main()
         else:
             playground.screen.fill((0, 0, 0))
-            g.show_score()
-            g.event_handling()
+            ui.show_score(g.score, playground)
+            event_handler.event_handling(g)
             g.create_apple()
             g.step_coords()
             g.queue_coords()
@@ -199,3 +123,7 @@ if __name__ == "__main__":
 
             g.counter += 1
         pygame.display.update()
+
+
+if __name__ == "__main__":
+    main()
