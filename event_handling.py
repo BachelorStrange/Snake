@@ -4,6 +4,9 @@ from pygame.locals import *
 
 class EventHandler:
 
+    def __init__(self, step):
+        self.step = step
+
     def game_over_handling(self):
         button_pressed = False
         button = None
@@ -20,7 +23,7 @@ class EventHandler:
 
         return button_pressed, button
 
-    def event_handling(self, g):
+    def keyboard_event_handling(self, g):
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -28,35 +31,35 @@ class EventHandler:
 
             if event.type == KEYDOWN:
                 if event.key == K_DOWN:
-                    g.stepy = +g.step
+                    g.stepy = +self.step
                     g.stepx = 0
 
                 elif event.key == K_UP:
-                    g.stepy = -g.step
+                    g.stepy = -self.step
                     g.stepx = 0
 
                 elif event.key == K_LEFT:
-                    g.stepx = -g.step
+                    g.stepx = -self.step
                     g.stepy = 0
 
                 elif event.key == K_RIGHT:
-                    g.stepx = g.step
+                    g.stepx = self.step
                     g.stepy = 0
 
             if event.type == KEYUP:
                 if event.key == K_DOWN:
                     # y += step
-                    g.stepy = g.step
+                    g.stepy = self.step
                     g.stepx = 0
 
                 elif event.key == K_UP:
-                    g.stepy = -g.step
+                    g.stepy = -self.step
                     g.stepx = 0
 
                 elif event.key == K_LEFT:
-                    g.stepx = -g.step
+                    g.stepx = -self.step
                     g.stepy = 0
 
                 elif event.key == K_RIGHT:
-                    g.stepx = g.step
+                    g.stepx = self.step
                     g.stepy = 0

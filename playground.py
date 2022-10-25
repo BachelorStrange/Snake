@@ -1,8 +1,5 @@
 import pygame
 from pygame.locals import *
-from sys import exit
-import time
-import random
 
 
 class Playground:
@@ -11,10 +8,12 @@ class Playground:
         self.screen = pygame.display.set_mode((playground_width, playground_width), 0, 32)
         self.field_width = 10
         self.nr_fields = int(playground_width/self.field_width)
-        self.coords = self.valid_centers()
+        self.coords = self.calculate_field_center_points()
         self.playground_width = playground_width
+        self.apple_radius = 4
+        self.snake_part_width = 9
 
-    def valid_centers(self):
+    def calculate_field_center_points(self):
         coords = list()
         start = int(self.field_width/2)
         for i in range(self.nr_fields):
@@ -23,27 +22,16 @@ class Playground:
 
         return coords
 
-    def border_collision_detection(self, tail_coords):
-        x = tail_coords[0][0]
-        y = tail_coords[0][1]
-        if x >= self.screen.get_width():
-            return True
-        elif x <= 0:
-            return True
-        elif y >= self.screen.get_height():
-            return True
-        elif y <= 0:
-            return True
+    def redraw_tails(self, tail_coords):
+        for coords in tail_coords:
+            pygame.draw.rect(self.screen, (150, 150, 150),
+                             Rect((coords[0] - int(self.snake_part_width / 2),
+                                   coords[1] - int(self.snake_part_width / 2)),
+                                  (self.snake_part_width, self.snake_part_width)))
 
-    def snake_collision_detection(self, tail_coords):
-        x = tail_coords[0][0]
-        y = tail_coords[0][1]
-        for i in range(1, len(tail_coords)):
-            if x == tail_coords[i][0] and y == tail_coords[i][1]:
-                return True
-        return False
-
-
+    def redraw_apples(self, apples):
+        for apple in apples:
+            pygame.draw.circle(self.screen, (255, 0, 0), (apple[0], apple[1]), self.apple_radius)
 
 
 if __name__ == "__main__":
